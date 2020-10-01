@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+  body {
+    background: #D2E4FC
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  input {
+    border: 1px solid #DDDDDD;
+    border-radius: 3px;
+    background: #FFFFFF;
+    padding: 10px;
+  }
+
+  input::placeholder {
+    color: #DDDDDD;
+  }
+  </style>
+</head>
+<body>
+  <form name="forms" id="forms"> 
+    <label>Any images of your venue you wish to upload?
+      <input name="images" type="file" accept="image/png, image/jpeg" multiple/>
+    </label>
+    <button type="submit">Submit</button>
+  </form>
+  
+  <script>
+    // get the form element from dom
+    const formElement = document.querySelector('form#forms')
+
+    // convert the form to JSON using browser method
+    // the getAll is if you have multiple fields with the same name in the form you'll get an array of values rather than just the last one - you might not need
+    // https://developer.mozilla.org/en-US/docs/Web/API/FormData
+    const getFormJSON = (form) => {
+      const data = new FormData(form);
+      return Array.from(data.keys()).reduce((body, key) => {
+        if (body[key]) {
+          // eslint-disable-next-line no-param-reassign
+          body[key] = data.getAll(key);
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          body[key] = data.get(key);
+        }
+        return body;
+      }, {});
+    };
+
+    // handle the form submission event, prevent default form behaviour, check validity, convert form to JSON
+    // https://developer.mozilla.org/en-US/docs/Web/API/File
+    const handler = (event) => {
+      event.preventDefault();
+        const valid = formElement.reportValidity();
+        if (valid) {
+            const data = getFormJSON(formElement);
+            const files = data.images
+            // this is to handle multiple images, if one image is uploaded you get just a File object, if multiple you get an array of them, so this just handles both cases to give you a result with is a File[]
+            const result = [files].flat().filter((file) => !!file.name);
+            console.log(result)
+        }
+    }
+
+    formElement.addEventListener("submit", handler)
+  </script>
+</body>
